@@ -33,7 +33,6 @@ player.on(AudioPlayerStatus.Idle, () => {
     //const connection = getVoiceConnection(songQueue.connection.guildId);
     setTimeout(() => {
         songQueue.playNext();
-        console.log(chalk.yellow('Current queue:', songQueue.songs));
         sendQueueMessage();
     }, 1000);
 });
@@ -122,7 +121,14 @@ const downloadVideo = async (url, connection, interaction) => {
     const freeSlotIndex = songQueue.getFreeSlotIndex();
     const filename = `resource/${freeSlotIndex}.mp3`;
     const command = `${COMMAND_PREFIX}yt-dlp -t mp3 -o "${filename}" --force-overwrites --parse-metadata "title:%(title)s" --embed-metadata ${url}`;
-
+    const newSong = new Song(
+        null,
+        url,
+        freeSlotIndex,
+        null,
+        null
+    );
+    songQueue.addSong(connection, newSong);
     try {
         const { stdout, stderr } = await execAsync(command);
         if (stderr) {
@@ -133,17 +139,13 @@ const downloadVideo = async (url, connection, interaction) => {
         console.log(chalk.gray(`Download finished`));
         const videoInfo = await ytdl.getBasicInfo(url);
         const videoDetails = videoInfo.videoDetails;
-        const newSong = new Song(
-            videoDetails.title,
-            url,
-            freeSlotIndex,
-            videoDetails.lengthSeconds,
-            videoDetails.thumbnails[videoDetails.thumbnails.length - 1].url
-        );
-        songQueue.addSong(connection, newSong);
+        newSong.title = videoDetails.title;
+        newSong.lengthSeconds = videoDetails.lengthSeconds;
+        newSong.thumbnailUrl = videoDetails.thumbnails[videoDetails.thumbnails.length - 1].url;
     }
     catch (err) {
         console.error(`Error executing yt-dlp:`, err);
+        songQueue.removeSpecificSong(newSong.id);
         await replyOrEdit(interaction, `There was an error downloading the video. Check if the link is correct or if the video is not age restricted.`);
     }
 }
@@ -181,7 +183,6 @@ export const play = async (interaction) => {
 
 export const shuffleQueue = async (interaction) => {
     songQueue.shuffle();
-    console.log(chalk.yellow('Current queue:', songQueue.songs));
     await replyOrEdit(interaction, 'Shuffled the queue!');
 }
 

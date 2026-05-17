@@ -115,6 +115,13 @@ export class Queue {
         this.songs.shift();
     }
 
+    removeSpecificSong(id) {
+        const index = this.songs.findIndex((song) => song.id === id);
+        if (index !== -1) {
+            this.songs.splice(index, 1);
+        }
+    }
+
     getCurrentSong() {
         return this.songs[0];
     }
