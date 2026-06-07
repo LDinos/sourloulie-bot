@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { play, connect, disconnect, shuffleQueue, skipSong, pauseSong, resumeSong, setVolume, getQueue } from './player.js';
+import { play, connect, disconnect, shuffleQueue, skipSong, pauseSong, resumeSong, setVolume, getQueue, clearQueue, getCurrentSong } from './player.js';
 export const commands = [
     {
         name: 'play',
@@ -46,4 +46,14 @@ export const commands = [
         data: new SlashCommandBuilder().setName('queue').setDescription('Displays the current queue'),
         execute: getQueue
     },
+    {
+        name: 'clear',
+        data: new SlashCommandBuilder().setName('clear').setDescription('Clears the current queue'),
+        execute: clearQueue
+    },
+    {
+        name: 'current',
+        data: new SlashCommandBuilder().setName('current').setDescription('Displays the current song'),
+        execute: getCurrentSong
+    }
 ]
